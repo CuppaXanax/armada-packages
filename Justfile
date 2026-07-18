@@ -9,6 +9,7 @@
 
 registry := env("REGISTRY", "localhost/armada-packages")
 packages := "extest inputplumber fex mesa mangohud gamescope networkmanager jupiter-hw-support kernel"
+rp5_tuned_packages := "fex mesa mangohud gamescope"
 
 import? 'Justfile.local'
 
@@ -29,6 +30,26 @@ image pkg: (artifacts pkg)
     bash scripts/stage.sh {{pkg}}
     buildah build -f oci/Containerfile -t "{{registry}}/{{pkg}}:latest" .
     echo "==> {{registry}}/{{pkg}}:latest"
+
+# Build one CPU-tuned runtime package for the SM8250 Cortex-A77/A55 baseline.
+[group('rp5')]
+rp5-artifacts pkg:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    case " {{rp5_tuned_packages}} " in
+        *" {{pkg}} "*) ;;
+        *) echo "RP5 CPU lane supports: {{rp5_tuned_packages}}" >&2; exit 2 ;;
+    esac
+    ARMADA_CPU_PROFILE=sm8250 just artifacts "{{pkg}}"
+
+# Build + wrap one SM8250-tuned runtime package as {{registry}}/<pkg>:rp5-test.
+[group('rp5')]
+rp5-image pkg: (rp5-artifacts pkg)
+    #!/usr/bin/env bash
+    set -euo pipefail
+    bash scripts/stage.sh "{{pkg}}"
+    buildah build -f oci/Containerfile -t "{{registry}}/{{pkg}}:rp5-test" .
+    echo "==> {{registry}}/{{pkg}}:rp5-test"
 
 # Build artifacts for every package
 [group('build')]
