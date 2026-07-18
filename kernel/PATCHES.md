@@ -4,6 +4,33 @@ Patches applied on top of BASE.env. Each entry's `source` is an upstream URL pin
 to a commit, or `armada` if it's original; a URL source with no `notes` is verbatim.
 `notes` mean the file was modified.
 
+## Retroid Pocket 5 / SM8250
+
+The RP5 port keeps Armada's 7.0.11 kernel.org tarball + ordered patch series +
+config fragment pipeline while importing ROCKNIX's SM8250 device inputs. A clean
+7.1.2 probe applied the first 38 Armada patches, then failed two hunks in the
+existing AYN AW88166 patch. Retaining 7.0.11 avoids refreshing unrelated device
+support and is the smallest buildable RP5 strategy. The authoritative local
+source is `D:/cuppaxanax/rocknix-distribution` at commit
+`7ab5e17df114cbaf9d340c7bebba308318e3d052`.
+
+- `patches/0001-msm-dsi-restore-wide_bus-bpp-calculation.patch`
+  source: ROCKNIX `0c284c4accbce47c4dfeb1616ba25013083a06f3` `projects/ROCKNIX/devices/SM8250/patches/linux/0001-msm-dsi-restore-wide_bus-bpp-calculation.patch`
+- `patches/0004-pm8150b.patch`
+  source: ROCKNIX `9f1fab30f6bbbc22c859b0cc5097b488466efefd` `projects/ROCKNIX/devices/SM8250/patches/linux/0004-pm8150b.patch`
+- `patches/0005-sm8250-uart.patch`
+  source: ROCKNIX `9f1fab30f6bbbc22c859b0cc5097b488466efefd` `projects/ROCKNIX/devices/SM8250/patches/linux/0005-sm8250-uart.patch`
+- `patches/0008-retroid-gamepad.patch`
+  source: ROCKNIX `e337cccd6fb6c2eaf95aff928907aae8a88bec9f` `projects/ROCKNIX/devices/SM8250/patches/linux/0008-retroid-gamepad.patch`
+- `patches/0009-qcom-spmi-haptics.patch`
+  source: ROCKNIX `9f1fab30f6bbbc22c859b0cc5097b488466efefd` `projects/ROCKNIX/devices/SM8250/patches/linux/0009-qcom-spmi-haptics.patch`
+- `patches/0016-rp5-smooth-brightness-adjustment.patch`
+  source: ROCKNIX `01b1b4cbea352b3040221f870fefa05cb2b77b51` `projects/ROCKNIX/devices/SM8250/patches/linux/0016-rp5-smooth-brightness-adjustment.patch`
+- `dts/sm8250-retroidpocket-common.dtsi`
+  source: ROCKNIX `e54f4bfe525eb258aec843d2af32f588731f7368` `projects/ROCKNIX/devices/SM8250/linux/dts/qcom/sm8250-retroidpocket-common.dtsi`
+- `dts/sm8250-retroidpocket-rp5.dts`
+  source: ROCKNIX `1138da27e0ded874e31decb5a9542644bcc8e2d7` `projects/ROCKNIX/devices/SM8250/linux/dts/qcom/sm8250-retroidpocket-rp5.dts`
+
 - `patches/0002-qcom-dispcc-sm8550-Fix-disp_cc_mdss_mdp_clk_src.patch`
   source: https://github.com/ROCKNIX/distribution/blob/e485495a942daba186d4a8543e18a1ad09c9a5d5/projects/ROCKNIX/devices/SM8550/patches/linux/0002-qcom-dispcc-sm8550-Fix-disp_cc_mdss_mdp_clk_src.patch
 - `patches/0004-drm-msm-a6xx-Enable-IFPC-on-Adreno-740.patch`

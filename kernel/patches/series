@@ -2,10 +2,12 @@
 # after a `#` are ignored.
 
 # ============== Display / DRM ==============
+0001-msm-dsi-restore-wide_bus-bpp-calculation.patch
 0002-qcom-dispcc-sm8550-Fix-disp_cc_mdss_mdp_clk_src.patch
 0004-drm-msm-a6xx-Enable-IFPC-on-Adreno-740.patch
 0010-msm-resource-cleanup.patch
 0048-drm-msm-dsi-reparent-byte-pixel-src-to-xo-on-disable.patch
+0016-rp5-smooth-brightness-adjustment.patch
 0051-gpu-panel-add-Pocket-ACE-panel-driver.patch
 0052-gpu-panel-add-Pocket-DMG-panel-driver.patch
 0053-gpu-panel-add-Pocket-DS-lower-panel-driver.patch
@@ -33,6 +35,7 @@
 0060-input-touchscreen-add-synaptics-dsx-driver.patch
 
 # ============== Input / Gamepad ==============
+0008-retroid-gamepad.patch
 0031_input--Add-driver-for-RSInput-Gamepad.patch
 0508-input-rsinput-add-pm-resume-to-reinit-mcu-after-suspend.patch
 0504-Enable-64-bit-processes-to-use-compat-input-syscalls.patch
@@ -42,6 +45,7 @@
 0071-HACK-fix-usb-boot-hang.patch
 
 # ============== Haptics ==============
+0009-qcom-spmi-haptics.patch
 1000-add-qcom-haptics-driver.patch
 1002-haptics-driver-support-periodic-sine-and-fixes.patch
 1003-rsinput-add-ff.patch          # rumble — keep after 1000/1002 (patches qcom-hv-haptics.c) and before 1300
@@ -62,6 +66,8 @@
 0042_mmc--sdhci-msm--Toggle-the-FIFO-write-clock-after-.patch
 
 # ============== SoC / Platform ==============
+0004-pm8150b.patch
+0005-sm8250-uart.patch
 20260424_neil_armstrong_arm64_dts_qcom_sm8_456_50_add_missing_cx_power_domain_to_gcc.patch
 v6_20260210_quic_utiwari_crypto_qce_add_runtime_pm_and_interconnect_bandwidth_scaling_support.patch
 0504-wakeup-qcom-ipcc-remove-IRQF-NO-SUSPEND.patch
