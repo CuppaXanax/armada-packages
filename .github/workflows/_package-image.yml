@@ -48,6 +48,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Normalize GHCR image reference
+        run: |
+          image="${IMAGE,,}"
+          [[ "${image}" == ghcr.io/*/* ]]
+          echo "IMAGE=${image}" >> "${GITHUB_ENV}"
+          echo "Publishing ${image}"
+
       - name: Tooling
         run: |
           sudo apt-get update -y && sudo apt-get install -y podman buildah ccache
