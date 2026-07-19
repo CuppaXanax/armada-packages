@@ -1,0 +1,42 @@
+name: Retroid Pocket 5 packages
+
+on:
+  push:
+    branches: [retroid-pocket-5-support]
+    paths:
+      - '.github/workflows/_package-image.yml'
+      - '.github/workflows/rp5.yml'
+      - 'toolchain.env'
+      - 'oci/**'
+      - 'scripts/**'
+      - 'kernel/**'
+      - 'mesa/**'
+      - 'gamescope/**'
+      - 'mangohud/**'
+      - 'fex/**'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Shared GHCR tag for this RP5 package set"
+        required: true
+        type: string
+        default: rp5-test
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [kernel, mesa, gamescope, mangohud, fex]
+    uses: ./.github/workflows/_package-image.yml
+    secrets: inherit
+    with:
+      package: ${{ matrix.package }}
+      cpu_profile: sm8250
+      tag: ${{ inputs.tag || format('rp5-{0}', github.sha) }}
+      publish_latest: false

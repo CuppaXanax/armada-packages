@@ -9,6 +9,21 @@ on:
         description: "Image name suffix under ghcr.io/<owner>/armada-packages/"
         required: true
         type: string
+      cpu_profile:
+        description: "Optional Armada CPU profile passed to package builds"
+        required: false
+        type: string
+        default: default
+      tag:
+        description: "Optional explicit image tag"
+        required: false
+        type: string
+        default: ""
+      publish_latest:
+        description: "Also update the package's latest tag"
+        required: false
+        type: boolean
+        default: true
     outputs:
       digest:
         description: "The pushed image digest (pin this in armada's Containerfile)"
@@ -18,7 +33,7 @@ jobs:
   build:
     runs-on: ubuntu-24.04-arm   # native aarch64; free for public repos
     concurrency:
-      group: ${{ inputs.package }}-image
+      group: ${{ inputs.package }}-${{ inputs.cpu_profile }}-${{ inputs.tag || 'latest' }}-image
       cancel-in-progress: true
     permissions:
       contents: read
@@ -29,6 +44,7 @@ jobs:
     env:
       IMAGE: ghcr.io/${{ github.repository_owner }}/armada-packages/${{ inputs.package }}
       CCACHE_DIR: ${{ github.workspace }}/.ccache
+      ARMADA_CPU_PROFILE: ${{ inputs.cpu_profile }}
     steps:
       - uses: actions/checkout@v4
 
@@ -49,29 +65,46 @@ jobs:
             ccache-${{ inputs.package }}-${{ runner.arch }}-${{ hashFiles('toolchain.env') }}-
 
       - name: Build artifacts
-        run: cd ${{ inputs.package }} && ./build.sh
+        run: |
+          echo "ARMADA_CPU_PROFILE=${ARMADA_CPU_PROFILE}"
+          cd ${{ inputs.package }} && ./build.sh
 
       - name: Stage image context
         run: |
           bash scripts/stage.sh ${{ inputs.package }}
+          case "${{ inputs.package }}" in
+            fex|mesa|mangohud|gamescope)
+              printf '%s\n' "${ARMADA_CPU_PROFILE}" > ctx/rpms/.armada-cpu-profile
+              ;;
+            kernel)
+              printf '%s\n' "${ARMADA_CPU_PROFILE}" > ctx/kernel/.armada-cpu-profile
+              ;;
+            *)
+              printf '%s\n' "${ARMADA_CPU_PROFILE}" > ctx/.armada-cpu-profile
+              ;;
+          esac
           echo "Staged for ${IMAGE}:" && find ctx -type f
 
       - name: Build + push
         id: push
         run: |
-          TAG="$(date -u +%Y%m%d)-${GITHUB_SHA::8}"
+          TAG="${{ inputs.tag }}"
+          [ -n "${TAG}" ] || TAG="$(date -u +%Y%m%d)-${GITHUB_SHA::8}"
           buildah build -f oci/Containerfile -t "${IMAGE}:${TAG}" .
-          buildah tag "${IMAGE}:${TAG}" "${IMAGE}:latest"
           echo "${{ secrets.GITHUB_TOKEN }}" | buildah login -u "${{ github.actor }}" --password-stdin ghcr.io
-          buildah push "${IMAGE}:${TAG}"
-          buildah push --digestfile /tmp/digest "${IMAGE}:latest"
+          buildah push --digestfile /tmp/digest "${IMAGE}:${TAG}"
+          if [[ "${{ inputs.publish_latest }}" == true ]]; then
+            buildah tag "${IMAGE}:${TAG}" "${IMAGE}:latest"
+            buildah push "${IMAGE}:latest"
+          fi
           DIGEST="$(cat /tmp/digest)"
           echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
           {
             echo "### \`${{ inputs.package }}\` published"
-            echo "Pin in armada's Containerfile:"
+            echo "CPU profile: \`${ARMADA_CPU_PROFILE}\`"
+            echo "Reference from Armada:"
             echo '```'
-            echo "${IMAGE}@${DIGEST}"
+            echo "${IMAGE}:${TAG}@${DIGEST}"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
